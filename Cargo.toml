@@ -1,0 +1,13 @@
+[package]
+name = "turing_machine_simulator_in_untyped_lambda_calculus"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["lib"]
+
+[dependencies]
+bimap = "0.6.3"
+lambda_calculus = "3"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"

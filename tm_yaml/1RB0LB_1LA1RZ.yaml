@@ -1,0 +1,10 @@
+# https://bbchallenge.org/1RB0LB_1LA1RZ
+blank: '0'
+start state: A
+table:
+  A:
+    0: {write: 1, R: B}
+    1: {write: 0, L: B}
+  B:
+    0: {write: 1, L: A}
+
