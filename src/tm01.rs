@@ -14,7 +14,6 @@ use lambda_calculus::data::boolean::tru;
 use lambda_calculus::data::num::church::eq;
 use lambda_calculus::data::pair::pair;
 use lambda_calculus::tuple;
-use std::collections::HashMap;
 
 type State = usize;
 
@@ -92,12 +91,12 @@ struct Transition01 {
 }
 
 impl Transition01 {
-    fn from_transition(hm: &HashMap<String, crate::yaml_parser::Stmt>, env: &Env) -> Self {
+    fn from_transition(hm: &crate::yaml_parser::Transition01, env: &Env) -> Self {
         let with_env_stmt = |stmt| Stmt::new(stmt, env);
 
         Self {
-            zero: hm.get("0").map(with_env_stmt),
-            one: hm.get("1").map(with_env_stmt),
+            zero: hm.zero.as_ref().map(with_env_stmt),
+            one: hm.one.as_ref().map(with_env_stmt),
         }
     }
 
