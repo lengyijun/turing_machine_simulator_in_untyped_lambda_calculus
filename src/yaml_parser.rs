@@ -14,7 +14,7 @@ use serde_yaml::Value;
 #[allow(non_snake_case)]
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Stmt {
-    pub write: Option<String>,
+    pub write: Option<usize>,
     pub L: Option<String>,
     pub R: Option<String>,
 }
@@ -26,6 +26,28 @@ pub struct Transition01 {
 
     #[serde(rename(deserialize = "1"))]
     pub one: Option<Stmt>,
+}
+
+impl Transition01 {
+    fn from_value(value: Value) -> Self {
+        let mut res = Self {
+            zero: None,
+            one: None,
+        };
+        let Value::Mapping(mapping) = value else {
+            unreachable!()
+        };
+        for (k, v) in mapping {
+            let k: usize = serde_yaml::from_value(k).unwrap();
+            let v: Stmt = serde_yaml::from_value(v).unwrap();
+            match k {
+                0 => res.zero = Some(v),
+                1 => res.one = Some(v),
+                _ => unreachable!(),
+            }
+        }
+        res
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -62,7 +84,7 @@ impl TuringMachine {
         let mut table = IndexMap::new();
         for (k, v) in mapping {
             let key: String = serde_yaml::from_value(k).unwrap();
-            let transition: Transition01 = serde_yaml::from_value(v).unwrap();
+            let transition: Transition01 = Transition01::from_value(v);
             table.insert(key, transition);
         }
 
@@ -91,12 +113,12 @@ impl TuringMachine {
 fn test_transition() {
     let t = Transition01 {
         zero: Some(Stmt {
-            write: Some("1".to_owned()),
+            write: Some(1),
             L: None,
             R: Some("B".to_owned()),
         }),
         one: Some(Stmt {
-            write: Some("1".to_owned()),
+            write: Some(1),
             L: Some("B".to_owned()),
             R: None,
         }),
@@ -117,19 +139,19 @@ fn main() {
         table: IndexMap::from([
             ("A".to_owned(), Transition01 {
                 zero: Some(Stmt {
-                    write: Some("1".to_owned()),
+                    write: Some(1),
                     L: None,
                     R: Some("B".to_owned())
                 }),
                 one: Some(Stmt {
-                    write: Some("1".to_owned()),
+                    write: Some(1),
                     L: Some("B".to_owned()),
                     R: None,
                 })
             }),
             ("B".to_owned(), Transition01 {
                 zero: Some(Stmt {
-                    write: Some("1".to_owned()),
+                    write: Some(1),
                     L: Some("A".to_owned()),
                     R: None,
                 }),

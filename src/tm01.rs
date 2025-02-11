@@ -58,7 +58,7 @@ impl Stmt {
         }
 
         Self {
-            write: stmt.write.as_ref().map(|s| s.parse().unwrap()).unwrap_or(0),
+            write: stmt.write.as_ref().map(|s| *s).unwrap_or(0),
             mmove,
             state,
         }
