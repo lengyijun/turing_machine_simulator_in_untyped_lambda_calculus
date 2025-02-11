@@ -115,6 +115,7 @@ name = "turing_machine_simulator_in_untyped_lambda_calculus"
 version = "0.1.0"
 dependencies = [
  "bimap",
+ "indexmap",
  "lambda_calculus",
  "serde",
  "serde_yaml",

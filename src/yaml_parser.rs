@@ -5,10 +5,11 @@
 //! `next state` must be provided
 //! `input` will be ignored currently
 
+use indexmap::IndexMap;
+use indexmap::IndexSet;
 use serde::Deserialize;
 use serde::Serialize;
-use std::collections::HashMap;
-use std::collections::HashSet;
+use serde_yaml::Value;
 
 #[allow(non_snake_case)]
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -28,41 +29,92 @@ pub struct Transition01 {
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+struct RawTuringMachine {
+    blank: char,
+
+    #[serde(rename(deserialize = "start state"))]
+    start_state: String,
+
+    // state -> (alpha -> Stmt)
+    table: Value, // don't support input
+                  // input: Option<String>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub struct TuringMachine {
     pub blank: char,
 
-    #[serde(rename(deserialize = "start state"))]
     pub start_state: String,
 
     // state -> (alpha -> Stmt)
-    pub table: HashMap<String, Transition01>,
+    pub table: IndexMap<String, Transition01>,
     // don't support input
     // input: Option<String>,
 }
 
 impl TuringMachine {
+    pub fn new(yaml_str: &str) -> Self {
+        let raw_tm: RawTuringMachine = serde_yaml::from_str(yaml_str).unwrap();
+
+        let Value::Mapping(mapping) = raw_tm.table else {
+            unreachable!()
+        };
+        let mut table = IndexMap::new();
+        for (k, v) in mapping {
+            let key: String = serde_yaml::from_value(k).unwrap();
+            let transition: Transition01 = serde_yaml::from_value(v).unwrap();
+            table.insert(key, transition);
+        }
+
+        Self {
+            blank: raw_tm.blank,
+            start_state: raw_tm.start_state,
+            table,
+        }
+    }
+
     pub fn validate(&self) {
         assert_eq!(self.blank, '0');
     }
 
-    pub fn states(&self) -> HashSet<String> {
-        let mut res: HashSet<String> = self.table.keys().cloned().collect();
+    /// The order is important
+    /// start_state first, then other states
+    pub fn states(&self) -> IndexSet<String> {
+        let mut res: IndexSet<String> = IndexSet::new();
         res.insert(self.start_state.clone());
+        res.extend(self.table.keys().cloned());
         res
     }
+}
+
+#[test]
+fn test_transition() {
+    let t = Transition01 {
+        zero: Some(Stmt {
+            write: Some("1".to_owned()),
+            L: None,
+            R: Some("B".to_owned()),
+        }),
+        one: Some(Stmt {
+            write: Some("1".to_owned()),
+            L: Some("B".to_owned()),
+            R: None,
+        }),
+    };
+    println!("{:?}", serde_yaml::to_value(t));
 }
 
 #[test]
 fn main() {
     let yaml_str = include_str!("../tm_yaml/1RB1LB_1LA1RZ.yaml");
 
-    let tm: TuringMachine = serde_yaml::from_str(yaml_str).unwrap();
+    let tm: TuringMachine = TuringMachine::new(yaml_str);
     tm.validate();
     println!("{:?}", tm);
     assert_eq!(tm, TuringMachine {
         blank: '0',
         start_state: "A".to_owned(),
-        table: HashMap::from([
+        table: IndexMap::from([
             ("A".to_owned(), Transition01 {
                 zero: Some(Stmt {
                     write: Some("1".to_owned()),
