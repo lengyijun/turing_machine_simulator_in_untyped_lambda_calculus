@@ -7,7 +7,7 @@ use crate::yaml_parser::TuringMachine;
 use lambda_calculus::Term;
 
 pub fn yaml_to_turing_machine(yaml_str: &str) -> Term {
-    let tm: TuringMachine = serde_yaml::from_str(yaml_str).unwrap();
+    let tm: TuringMachine = TuringMachine::new(yaml_str);
     let tm01 = Tm01::from_tm(tm);
 
     tm01.machine()

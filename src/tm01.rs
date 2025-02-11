@@ -179,15 +179,14 @@ struct Env {
 
 impl Env {
     fn new(tm: &TuringMachine) -> Self {
-        let mut states = tm.states();
+        let states = tm.states();
 
         let mut bmap: BiMap<String, State> = BiMap::new();
-        bmap.insert_no_overwrite(tm.start_state.clone(), 0).unwrap();
-        states.remove(&tm.start_state);
 
         for state in states {
             bmap.insert_no_overwrite(state, bmap.len()).unwrap();
         }
+        assert_eq!(bmap.get_by_left(&tm.start_state), Some(&0));
         Self { bmap }
     }
 }
@@ -196,7 +195,7 @@ impl Env {
 fn main() {
     let yaml_str = include_str!("../tm_yaml/1RB1LB_1LA1RZ.yaml");
 
-    let tm: TuringMachine = serde_yaml::from_str(yaml_str).unwrap();
+    let tm: TuringMachine = TuringMachine::new(yaml_str);
     tm.validate();
 
     let tm01 = Tm01::from_tm(tm);

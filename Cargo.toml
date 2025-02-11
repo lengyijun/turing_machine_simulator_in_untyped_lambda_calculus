@@ -8,6 +8,7 @@ crate-type = ["lib"]
 
 [dependencies]
 bimap = "0.6.3"
+indexmap = "2.7.1"
 lambda_calculus = "3"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
