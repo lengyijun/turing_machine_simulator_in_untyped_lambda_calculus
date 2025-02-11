@@ -15,12 +15,12 @@ pub fn yaml_to_turing_machine(yaml_str: &str) -> Term {
 
 #[cfg(test)]
 mod test_bb {
-    // Examples copied from https://wiki.bbchallenge.org/wiki/BB(2)
 
     use crate::turing_machine::tape::run;
     use crate::yaml_to_turing_machine;
     use lambda_calculus::*;
 
+    // Examples copied from https://wiki.bbchallenge.org/wiki/BB(2)
     #[test]
     fn test_bb2() {
         assert_eq!(
@@ -81,6 +81,8 @@ mod test_bb {
         );
     }
 
+    // Examples copied from https://wiki.bbchallenge.org/wiki/BB(3)
+    // 24 minutes in release mode
     #[test]
     fn test_bb3() {
         // 5 steps
@@ -93,8 +95,8 @@ mod test_bb {
                 HSP,
                 0
             ),
-            1.into_church() // halt at state C
-                            // C -> 1 is choosen by random
+            2.into_church() // halt at state C
+                            // C -> 2
         );
 
         // 6 steps
@@ -120,8 +122,8 @@ mod test_bb {
                 HSP,
                 0
             ),
-            1.into_church() // halt at state C
-                            // C -> 1 is choosen by random
+            2.into_church() // halt at state C
+                            // C -> 2
         );
     }
 }
