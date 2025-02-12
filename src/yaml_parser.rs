@@ -11,12 +11,14 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde_yaml::Value;
 
+type State = String;
+
 #[allow(non_snake_case)]
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Stmt {
     pub write: Option<usize>,
-    pub L: Option<String>,
-    pub R: Option<String>,
+    pub L: Option<State>,
+    pub R: Option<State>,
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -55,21 +57,22 @@ struct RawTuringMachine {
     blank: char,
 
     #[serde(rename(deserialize = "start state"))]
-    start_state: String,
+    start_state: State,
 
     // state -> (alpha -> Stmt)
-    table: Value, // don't support input
-                  // input: Option<String>,
+    table: Value,
+    // don't support input
+    // input: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct TuringMachine {
     pub blank: char,
 
-    pub start_state: String,
+    pub start_state: State,
 
     // state -> (alpha -> Stmt)
-    pub table: IndexMap<String, Transition01>,
+    pub table: IndexMap<State, Transition01>,
     // don't support input
     // input: Option<String>,
 }
@@ -83,7 +86,7 @@ impl TuringMachine {
         };
         let mut table = IndexMap::new();
         for (k, v) in mapping {
-            let key: String = serde_yaml::from_value(k).unwrap();
+            let key: State = serde_yaml::from_value(k).unwrap();
             let transition: Transition01 = Transition01::from_value(v);
             table.insert(key, transition);
         }
@@ -101,8 +104,8 @@ impl TuringMachine {
 
     /// The order is important
     /// start_state first, then other states
-    pub fn states(&self) -> IndexSet<String> {
-        let mut res: IndexSet<String> = IndexSet::new();
+    pub fn states(&self) -> IndexSet<State> {
+        let mut res: IndexSet<State> = IndexSet::new();
         res.insert(self.start_state.clone());
         res.extend(self.table.keys().cloned());
         res
