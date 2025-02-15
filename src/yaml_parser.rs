@@ -21,6 +21,16 @@ pub struct Stmt {
     pub R: Option<State>,
 }
 
+impl Stmt {
+    fn states(&self) -> impl Iterator<Item = State> {
+        [&self.L, &self.R]
+            .into_iter()
+            .map(Option::as_ref)
+            .flatten()
+            .cloned()
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Transition01 {
     #[serde(rename(deserialize = "0"))]
@@ -49,6 +59,13 @@ impl Transition01 {
             }
         }
         res
+    }
+    fn states(&self) -> impl Iterator<Item = State> {
+        [&self.zero, &self.one]
+            .into_iter()
+            .flatten()
+            .map(Stmt::states)
+            .flatten()
     }
 }
 
@@ -108,6 +125,7 @@ impl TuringMachine {
         let mut res: IndexSet<State> = IndexSet::new();
         res.insert(self.start_state.clone());
         res.extend(self.table.keys().cloned());
+        res.extend(self.table.values().map(Transition01::states).flatten());
         res
     }
 }
