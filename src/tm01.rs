@@ -48,11 +48,11 @@ impl Stmt {
             (None, None) => unreachable!(),
             (None, Some(s)) => {
                 mmove = Mmove::R;
-                state = *env.bmap.get_by_left(s).unwrap();
+                state = *env.bmap.get_by_right(s).unwrap();
             }
             (Some(s), None) => {
                 mmove = Mmove::L;
-                state = *env.bmap.get_by_left(s).unwrap();
+                state = *env.bmap.get_by_right(s).unwrap();
             }
             (Some(_), Some(_)) => panic!("Both L and R provided"),
         }
@@ -125,7 +125,7 @@ impl Tm01 {
         let mut table = Vec::new();
 
         for i in 0..env.bmap.len() {
-            let state = env.bmap.get_by_right(&i).unwrap();
+            let state = env.bmap.get_by_left(&i).unwrap();
             table.push(Transition01::from_transition(&tm.table[state], &env));
         }
 
@@ -174,19 +174,13 @@ fn machine(current_state: State, v: &[Transition01]) -> Term {
 }
 
 struct Env {
-    bmap: BiMap<String, State>,
+    bmap: BiMap<State, String>,
 }
 
 impl Env {
     fn new(tm: &TuringMachine) -> Self {
-        let states = tm.states();
-
-        let mut bmap: BiMap<String, State> = BiMap::new();
-
-        for state in states {
-            bmap.insert_no_overwrite(state, bmap.len()).unwrap();
-        }
-        assert_eq!(bmap.get_by_left(&tm.start_state), Some(&0));
+        let bmap: BiMap<State, String> = BiMap::from_iter(tm.states().iter().cloned().enumerate());
+        assert_eq!(bmap.get_by_right(&tm.start_state), Some(&0));
         Self { bmap }
     }
 }
